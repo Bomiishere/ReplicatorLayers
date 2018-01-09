@@ -13,29 +13,30 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //init replicatorLayer
         let replicatorLayer = CAReplicatorLayer()
         replicatorLayer.frame.size = view.frame.size
         replicatorLayer.masksToBounds = true
-        view.layer.addSublayer(replicatorLayer)
+//        view.layer.addSublayer(replicatorLayer)
         
-        
-        //sublayer
+        //add image to replicatorLayer
         let image = #imageLiteral(resourceName: "testImage")
         let imageLayer = CALayer()
         imageLayer.contents = image.cgImage
         imageLayer.frame.size = image.size
+        imageLayer.transform = CATransform3DMakeScale(1, 0, 0)
         replicatorLayer.addSublayer(imageLayer)
         
-        let instanceCount = view.frame.width / image.size.width
-        replicatorLayer.instanceCount = Int(ceil(instanceCount))
+        //replicatorLayer horizontal count
+        let instanceHorizontalCount = view.frame.width / image.size.width * 2.5
+        replicatorLayer.instanceCount = Int(ceil(instanceHorizontalCount))
         
-        //transform
+        //replicatorLayer transform for width
         replicatorLayer.instanceTransform = CATransform3DMakeTranslation(
-            image.size.width, 0, 0
+            imageLayer.frame.width/3, 0, 0
         )
         
-        // Reduce the red & green color component of each instance,
-        // effectively making each copy more and more blue
+        // Reduce the r,g,b color component of each instance,
         let redColorOffset = -0.2 / Float(replicatorLayer.instanceCount)
         let greenColorOffset = -0.2 / Float(replicatorLayer.instanceCount)
         let blueColorOffset = -0.8 / Float(replicatorLayer.instanceCount)
@@ -43,6 +44,7 @@ class ViewController: UIViewController {
         replicatorLayer.instanceRedOffset = redColorOffset
         replicatorLayer.instanceGreenOffset = greenColorOffset
         
+        //init vertical replicatorLayer
         let verticalReplicatorLayer = CAReplicatorLayer()
         verticalReplicatorLayer.frame.size = view.frame.size
         verticalReplicatorLayer.masksToBounds = true
@@ -55,18 +57,18 @@ class ViewController: UIViewController {
         verticalReplicatorLayer.instanceTransform = CATransform3DMakeTranslation(
             0, image.size.height/1.05, 0
         )
-        
         verticalReplicatorLayer.addSublayer(replicatorLayer)
         
-        let delay = TimeInterval(0.1)
-        replicatorLayer.instanceDelay = delay
-        verticalReplicatorLayer.instanceDelay = delay
+        // delay
+        let delay = 0.05
+        replicatorLayer.instanceDelay = TimeInterval(delay)
+        verticalReplicatorLayer.instanceDelay = TimeInterval(delay * Double(replicatorLayer.instanceCount))
         
         let animation = CABasicAnimation(keyPath: "transform.scale")
-        animation.duration = 2
+        animation.duration = delay * Double(replicatorLayer.instanceCount) * Double(verticalReplicatorLayer.instanceCount)
         animation.fromValue = 1
-        animation.toValue = 0.1
-        animation.autoreverses = true
+        animation.toValue = 0.7
+        animation.autoreverses = false
         animation.repeatCount = .infinity
         imageLayer.add(animation, forKey: "hypnoscale")
     }
